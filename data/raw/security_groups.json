@@ -1,0 +1,101 @@
+{
+    "SecurityGroups": [
+        {
+            "GroupId": "sg-07e3397c459201a40",
+            "IpPermissionsEgress": [],
+            "VpcId": "vpc-075544ec3111961f8",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-2:508003923138:security-group/sg-07e3397c459201a40",
+            "OwnerId": "508003923138",
+            "GroupName": "misconfigured-sg-1",
+            "Description": "Misconfigured Security Group 1",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 22,
+                    "ToPort": 22,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                },
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 3389,
+                    "ToPort": 3389,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-0a164c5364890d5f1",
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1",
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ],
+            "VpcId": "vpc-075544ec3111961f8",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-2:508003923138:security-group/sg-0a164c5364890d5f1",
+            "OwnerId": "508003923138",
+            "GroupName": "misconfigured-sg-2",
+            "Description": "Misconfigured Security Group 2",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 0,
+                    "ToPort": 65535,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        },
+        {
+            "GroupId": "sg-003f31deb45dd1250",
+            "IpPermissionsEgress": [],
+            "VpcId": "vpc-075544ec3111961f8",
+            "SecurityGroupArn": "arn:aws:ec2:us-east-2:508003923138:security-group/sg-003f31deb45dd1250",
+            "OwnerId": "508003923138",
+            "GroupName": "secure-sg",
+            "Description": "Secured Security Group",
+            "IpPermissions": [
+                {
+                    "IpProtocol": "tcp",
+                    "FromPort": 22,
+                    "ToPort": 22,
+                    "UserIdGroupPairs": [],
+                    "IpRanges": [
+                        {
+                            "CidrIp": "104.39.93.91/32"
+                        }
+                    ],
+                    "Ipv6Ranges": [],
+                    "PrefixListIds": []
+                }
+            ]
+        }
+    ]
+}

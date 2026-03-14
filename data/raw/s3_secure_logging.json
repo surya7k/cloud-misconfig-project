@@ -1,0 +1,9 @@
+{
+    "LoggingEnabled": {
+        "TargetBucket": "ist584-s3-access-logs",
+        "TargetPrefix": "",
+        "TargetObjectKeyFormat": {
+            "SimplePrefix": {}
+        }
+    }
+}

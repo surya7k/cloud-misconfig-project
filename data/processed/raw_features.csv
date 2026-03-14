@@ -1,0 +1,9 @@
+resource_type,resource_name,public_access_enabled,encryption_enabled,versioning_enabled,logging_enabled,has_wildcard_permission,has_admin_privilege,has_priv_esc_potential,policy_length,allow_wildcard_action,allow_wildcard_resource,inbound_rule_count,outbound_rule_count,open_ports_to_world,ssh_open_to_world,rdp_open_to_world,all_ports_open
+s3,misconfigured-test-bucket-ist584,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+s3,secure-test-bucket-ist584,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+iam,MisconfiguredWildcardPolicy,0.0,0.0,0.0,0.0,1.0,1.0,0.0,93.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0
+iam,MisconfiguredPrivEscPolicy,0.0,0.0,0.0,0.0,0.0,0.0,1.0,162.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+iam,SecureReadOnlyPolicy,0.0,0.0,0.0,0.0,0.0,0.0,0.0,162.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+security_group,misconfigured-sg-1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,2.0,1.0,1.0,0.0
+security_group,misconfigured-sg-2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0
+security_group,secure-sg,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0
