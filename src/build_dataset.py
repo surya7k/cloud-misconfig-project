@@ -4,10 +4,11 @@ import subprocess, sys
 print("🔨 Building full dataset...")
 steps = [
     "python src/ingest.py",
-    "python src/label.py", 
+    "python src/label.py",
     "python src/parse_terragoat.py",
     "python src/parse_cfngoat.py",
     "python src/parse_checkov.py",
+    "python src/parse_awssra.py",
     "python src/generate_synthetic.py"
 ]
 

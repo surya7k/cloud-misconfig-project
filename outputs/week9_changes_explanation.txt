@@ -1,0 +1,136 @@
+Week 9 Updated Prototype — Changes Explanation
+================================================
+
+CHANGE 1: S3 Labeling Bug Fix (src/label.py)
+---------------------------------------------
+What was wrong:
+  The original code hardcoded a single bucket name to label as misconfigured:
+    labeled.loc[s3_mask & (labeled["resource_name"] == "misconfigured-test-bucket-ist584"), "label"] = 1
+  This meant every other S3 bucket — no matter how insecure — was labeled "secure" (0).
+
+What was changed:
+  Replaced the hardcoded name check with feature-based labeling rules:
+    - encryption_enabled == 0  → misconfigured
+    - versioning_enabled == 0  → misconfigured
+    - logging_enabled == 0     → misconfigured
+    - public_access_enabled == 1 → misconfigured
+  Now any S3 bucket missing any security feature is correctly flagged. This matches
+  the same labeling logic used by every other parser in the pipeline (parse_terragoat.py,
+  parse_cfngoat.py, parse_checkov.py).
+
+Why it matters:
+  This is a data quality fix. The model can only learn correct patterns if the training
+  labels are correct. With the old code, the model was trained on incorrectly labeled
+  S3 data, which contributed to lower recall on S3 resources.
+
+
+CHANGE 2: Confusion Matrix + Classification Report (src/train.py)
+------------------------------------------------------------------
+What was added:
+  Used cross_val_predict() to collect out-of-fold predictions from 5-fold cross
+  validation, then printed:
+    - Full classification report (precision, recall, F1 per class: Secure vs Misconfigured)
+    - Confusion matrix showing TN, FP, FN, TP counts
+
+What it shows:
+  Random Forest:  TN=89  FP=4  FN=19  TP=67
+  Logistic Regression: TN=85  FP=8  FN=31  TP=55
+
+Why it matters:
+  Previously, confusion_matrix and classification_report were imported but never used.
+  The confusion matrix reveals that Random Forest has fewer false negatives (19 vs 31),
+  meaning it catches more actual misconfigurations. This is critical in security — a
+  false negative means a misconfigured resource goes undetected.
+
+
+CHANGE 3: Per-Resource-Type Evaluation (src/train.py)
+------------------------------------------------------
+What was added:
+  New function evaluate_per_resource_type() that breaks down precision, recall, and F1
+  by resource type (S3, IAM, Security Group) for each model.
+
+What it shows:
+  Random Forest:
+    S3:              P=0.893  R=0.806  F1=0.847
+    IAM:             P=1.000  R=0.926  F1=0.962
+    Security Group:  P=0.929  R=0.464  F1=0.619
+
+  Logistic Regression:
+    S3:              P=0.800  R=0.387  F1=0.522
+    IAM:             P=0.926  R=0.926  F1=0.926
+    Security Group:  P=0.875  R=0.500  F1=0.636
+
+Why it matters:
+  This reveals WHERE the models struggle. Logistic Regression's low overall recall
+  (0.641) is heavily driven by S3 (only 0.387 recall — it misses 61% of misconfigured
+  S3 buckets). Both models struggle with Security Groups. IAM performs well for both
+  models. This analysis tells us exactly where to focus improvement efforts next.
+
+
+CHANGE 4: Visualization Suite — 4 PNG Charts (src/train.py)
+-------------------------------------------------------------
+What was added:
+  New function generate_visualizations() that produces 4 charts saved to outputs/:
+
+  1. confusion_matrix.png
+     Side-by-side heatmaps comparing Random Forest vs Logistic Regression confusion
+     matrices. Makes it easy to visually compare TN/FP/FN/TP counts between models.
+
+  2. feature_importance.png
+     Horizontal bar chart showing Random Forest feature importances, color-coded by
+     resource type (blue = S3, orange = IAM, green = Security Group). Shows which
+     features the model relies on most for its predictions.
+
+  3. model_comparison.png
+     Grouped bar chart comparing Precision, Recall, and F1 for both models. Includes
+     dashed threshold lines at F1 = 0.75 and Recall = 0.80 (project targets). Makes
+     it clear that Random Forest meets both targets while Logistic Regression falls
+     short on recall.
+
+  4. roc_curve.png
+     ROC curves for both models on one plot with AUC scores in the legend. Shows the
+     tradeoff between true positive rate and false positive rate at all thresholds.
+
+Why it matters:
+  The Week 7 demo was console-only with no visualizations. These charts make the
+  model evaluation results much easier to understand and present. They also demonstrate
+  a more thorough evaluation methodology.
+
+
+CHANGE 5: Inference Script (src/predict.py — new file)
+-------------------------------------------------------
+What was added:
+  New script that loads the trained Random Forest model and predicts whether a given
+  AWS resource configuration is secure or misconfigured. It:
+    - Accepts a JSON config file as input
+    - Extracts the same 16 features used during training
+    - Outputs: prediction (SECURE/MISCONFIGURED), confidence %, risk level (LOW/MEDIUM/HIGH)
+    - Lists specific risk factors detected (e.g., "Encryption not enabled")
+
+  Also created 3 sample config files in data/samples/:
+    - insecure_s3.json:  S3 bucket with public access, no encryption/versioning/logging
+    - secure_iam.json:   Read-only IAM policy with s3:GetObject and s3:ListBucket
+    - open_sg.json:      Security group with SSH (port 22) open to 0.0.0.0/0
+
+Demo results:
+  insecure_s3.json  → MISCONFIGURED, 82.6% confidence, HIGH risk
+  secure_iam.json   → SECURE, 99.0% confidence, LOW risk
+  open_sg.json      → MISCONFIGURED, 98.9% confidence, HIGH risk
+
+Why it matters:
+  This turns the trained model into a usable tool. Instead of just training and
+  evaluating, you can now feed in any AWS resource config and get an actionable risk
+  assessment. This demonstrates the end-to-end value of the ML pipeline: from raw
+  config data to a risk score that a security team could act on.
+
+
+NEXT STEPS (for discussion in video)
+--------------------------------------
+1. Fix S3 and Security Group recall — the per-resource breakdown shows these are the
+   weakest areas. Could add more training data or engineer additional features.
+2. Compare ML model vs rule-based baseline (e.g., Checkov) — quantify the added value
+   of the ML approach over traditional static rules.
+3. Hyperparameter tuning — optimize Random Forest parameters (n_estimators, max_depth,
+   min_samples_split) to improve performance further.
+4. Test on unseen real-world configs — validate that the model generalizes beyond the
+   training data sources.

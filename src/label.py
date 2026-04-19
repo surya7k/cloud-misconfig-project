@@ -7,7 +7,15 @@ def add_labels(df):
     
     # S3: misconfigured if ANY security feature missing
     s3_mask = (labeled["resource_type"] == "s3")
-    labeled.loc[s3_mask & (labeled["resource_name"] == "misconfigured-test-bucket-ist584"), "label"] = 1
+    labeled.loc[
+        s3_mask & (
+            (labeled["encryption_enabled"] == 0) |
+            (labeled["versioning_enabled"] == 0) |
+            (labeled["logging_enabled"] == 0) |
+            (labeled["public_access_enabled"] == 1)
+        ),
+        "label"
+    ] = 1
     
     # IAM: wildcard OR priv-esc = misconfigured
     iam_mask = (labeled["resource_type"] == "iam")

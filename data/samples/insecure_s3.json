@@ -1,0 +1,8 @@
+{
+    "resource_type": "s3",
+    "resource_name": "demo-insecure-bucket",
+    "public_access_enabled": 1,
+    "encryption_enabled": 0,
+    "versioning_enabled": 0,
+    "logging_enabled": 0
+}
