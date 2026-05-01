@@ -19,20 +19,37 @@ and converted them to our scoring format. The model has never seen them."*
 | `rw_tf_modules_alb_sg.json` | terraform-aws-modules/terraform-aws-security-group | MISCONFIGURED per rules / **legitimate in context** |
 | `rw_stackoverflow_ssh_open.json` | Common StackOverflow / quickstart pattern | MISCONFIGURED |
 
-## Why this isn't a quantitative evaluation
+## Held-out evaluation
 
-These samples are a qualitative demo, not a thesis evaluation:
+These samples function as a held-out test set: none of them appear in
+`labeled_features.csv`, and the trained Random Forest sees them only at
+inference time. Run the evaluation with:
 
-1. **No held-out ground truth** — the verdicts above reflect the author's
-   judgment based on the labeling rules in `src/label.py`, not an
-   independent expert relabel.
+```bash
+python -m src.evaluate_holdout
+```
+
+Outputs `outputs/realworld_holdout.csv` (per-sample predictions) and
+`outputs/realworld_holdout_summary.csv` (aggregate metrics under both
+strict and context-aware interpretations).
+
+## Threats to validity
+
+This is a useful generalization check but not a definitive thesis-grade
+evaluation:
+
+1. **Author-assigned ground truth** — verdicts reflect the project
+   author's judgment derived from the same labeling rules in
+   `src/label.py`, not an independent expert relabel. This measures
+   generalization across configuration *patterns*, not across labeling
+   judgment.
 2. **Hand-transcribed**, not parsed end-to-end — the project's regex-based
    parsers do not reliably handle modern Terraform AWS provider 4.x+
    syntax (e.g. `aws_s3_bucket_versioning` as a separate resource), so
    these samples sidestep parser limitations.
-3. **Small N** — 8 samples is sufficient for a demo segment but not for
-   metrics. Future work: curate ~50+ samples and apply manual ground-truth
-   labels to produce a real-world test set.
+3. **Small N** — 8 samples gives only loose confidence intervals on
+   precision/recall. Future work: curate ~50+ samples and apply manual
+   ground-truth labels by an independent reviewer.
 
 ## The ALB security group case
 

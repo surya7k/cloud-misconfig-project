@@ -78,6 +78,41 @@ is where ML's value over rule-based detection is clearest in the dataset.
 
 ---
 
+## Held-out evaluation (real-world samples)
+
+To test generalization beyond cross-validation, the trained Random Forest
+was scored against `data/samples/realworld/` — 8 configurations
+transcribed from public AWS reference architectures, Terraform module
+registries, and tutorial repositories. **None of these resources appear
+in `labeled_features.csv`.**
+
+| Interpretation                              | n | Acc  | Precision | Recall | F1   |
+|---------------------------------------------|---|------|-----------|--------|------|
+| Strict (matches labeling rules)             | 8 | 0.88 | 1.00      | 0.75   | 0.86 |
+| Context-aware (intentional public ALB = secure) | 8 | 1.00 | 1.00      | 1.00   | 1.00 |
+
+Held-out F1 (0.86) tracks the 5-fold CV F1 (0.89) with no catastrophic
+drop — evidence the model generalizes rather than memorizing the training
+distribution. The single strict-label miss is `rw_tf_modules_alb_sg.json`:
+the labeling rules flag any `0.0.0.0/0` ingress as MISCONFIGURED, but the
+model's `p=0.27` correctly reflects that ports 80/443 open to the world
+on an Application Load Balancer is the intended pattern. The model is
+context-blind in the same way the rules are — it just disagrees with
+them in this borderline case.
+
+```bash
+python -m src.evaluate_holdout
+```
+
+**Caveats** (acknowledged in `data/samples/realworld/README.md`):
+N=8 is too small for tight confidence intervals; verdicts were assigned
+by the project author using the same labeling logic in `src/label.py`,
+so this measures generalization across configuration *patterns* rather
+than across labeling judgment. A 50+ sample expert-relabeled test set
+is left for future work.
+
+---
+
 ## Live demo (Streamlit)
 
 ```bash
@@ -178,6 +213,7 @@ src/
   predict.py            # single-config CLI inference
   explain.py            # SHAP per-prediction explanations
   compare_checkov.py    # rule-based vs ML comparison
+  evaluate_holdout.py   # held-out evaluation on data/samples/realworld/
 app.py                  # Streamlit live demo
 data/
   raw/                  # JSON configs and AWSSRA repo
