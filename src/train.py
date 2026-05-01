@@ -38,7 +38,17 @@ S3_DERIVED_COLS = [
     "s3_public_no_logging",
 ]
 
-FEATURE_COLS = BASE_FEATURE_COLS + S3_DERIVED_COLS
+# Week 10 expansion — additional security-relevant features
+EXTENDED_FEATURE_COLS = [
+    # S3
+    "bucket_policy_wildcard", "mfa_delete_enabled", "tls_enforced",
+    # IAM
+    "dangerous_service_wildcard", "has_no_condition",
+    # Security Group
+    "db_port_open_to_world", "egress_unrestricted",
+]
+
+FEATURE_COLS = BASE_FEATURE_COLS + S3_DERIVED_COLS + EXTENDED_FEATURE_COLS
 
 S3_THRESHOLD = 0.40  # default, will be overridden by F2-optimal threshold
 
@@ -107,6 +117,11 @@ def load_data():
     df = pd.read_csv(f"{DATA_PROCESSED}/labeled_features.csv")
     df[BASE_FEATURE_COLS] = df[BASE_FEATURE_COLS].fillna(0)
     df = add_s3_derived_features(df)
+    # Extended features may be missing on rows from older parsers — default to 0
+    for col in EXTENDED_FEATURE_COLS:
+        if col not in df.columns:
+            df[col] = 0
+        df[col] = df[col].fillna(0)
     X = df[FEATURE_COLS].values
     y = df["label"].values
     sample_weights = compute_sample_weights(df)
@@ -327,7 +342,8 @@ def main():
 
     X, y, df, sample_weights = load_data()
     print(f"Dataset: {len(df)} records | Misconfigured: {int(y.sum())} | Secure: {int((y==0).sum())}")
-    print(f"Features: {len(FEATURE_COLS)} ({len(BASE_FEATURE_COLS)} base + {len(S3_DERIVED_COLS)} S3 derived)")
+    print(f"Features: {len(FEATURE_COLS)} ({len(BASE_FEATURE_COLS)} base + "
+          f"{len(S3_DERIVED_COLS)} S3 derived + {len(EXTENDED_FEATURE_COLS)} extended)")
 
     # Scale features
     scaler = StandardScaler()

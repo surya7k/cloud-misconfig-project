@@ -7,6 +7,7 @@ steps = [
     "python src/label.py",
     "python src/parse_terragoat.py",
     "python src/parse_cfngoat.py",
+    "python -m src.parse_cloudgoat",
     "python src/parse_checkov.py",
     "python src/parse_awssra.py",
     "python src/generate_synthetic.py"

@@ -69,6 +69,15 @@ def make_s3_record(name):
         "ssh_open_to_world": np.nan,
         "rdp_open_to_world": np.nan,
         "all_ports_open": np.nan,
+        # Extended S3 features — AWSSRA baselines are secure
+        "bucket_policy_wildcard": 0,
+        "mfa_delete_enabled": 1,
+        "tls_enforced": 1,
+        # Extended IAM/SG features → not applicable
+        "dangerous_service_wildcard": np.nan,
+        "has_no_condition": np.nan,
+        "db_port_open_to_world": np.nan,
+        "egress_unrestricted": np.nan,
     }
 
 
@@ -98,6 +107,16 @@ def make_iam_record(name):
         "ssh_open_to_world": np.nan,
         "rdp_open_to_world": np.nan,
         "all_ports_open": np.nan,
+        # Extended S3 features → not applicable
+        "bucket_policy_wildcard": np.nan,
+        "mfa_delete_enabled": np.nan,
+        "tls_enforced": np.nan,
+        # Extended IAM features — AWSSRA baselines are secure
+        "dangerous_service_wildcard": 0,
+        "has_no_condition": 0,
+        # Extended SG features → not applicable
+        "db_port_open_to_world": np.nan,
+        "egress_unrestricted": np.nan,
     }
 
 
@@ -127,6 +146,15 @@ def make_sg_record(name):
         "ssh_open_to_world": 0,
         "rdp_open_to_world": 0,
         "all_ports_open": 0,
+        # Extended S3/IAM features → not applicable
+        "bucket_policy_wildcard": np.nan,
+        "mfa_delete_enabled": np.nan,
+        "tls_enforced": np.nan,
+        "dangerous_service_wildcard": np.nan,
+        "has_no_condition": np.nan,
+        # Extended SG features — AWSSRA baselines are secure
+        "db_port_open_to_world": 0,
+        "egress_unrestricted": 0,
     }
 
 

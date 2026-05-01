@@ -1,0 +1,16 @@
+{
+    "_source": "AWS reference architecture pattern (aws-samples)",
+    "_source_url": "https://github.com/aws-samples",
+    "_pattern_description": "Well-Architected production S3 bucket: KMS encryption, versioning, access logging, public-access blocked, MFA delete, TLS-only bucket policy.",
+    "_expected_verdict": "SECURE",
+
+    "resource_type": "s3",
+    "resource_name": "rw-aws-samples-secure-s3",
+    "public_access_enabled": 0,
+    "encryption_enabled": 1,
+    "versioning_enabled": 1,
+    "logging_enabled": 1,
+    "bucket_policy_wildcard": 0,
+    "mfa_delete_enabled": 1,
+    "tls_enforced": 1
+}

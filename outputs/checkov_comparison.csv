@@ -1,0 +1,9 @@
+model,resource_type,n,precision,recall,f1
+Checkov (rules),overall,123,0.7967479674796748,1.0,0.8868778280542986
+Checkov (rules),s3,30,1.0,1.0,1.0
+Checkov (rules),iam,54,0.9629629629629629,1.0,0.9811320754716981
+Checkov (rules),security_group,39,0.41025641025641024,1.0,0.5818181818181818
+Random Forest (ML),overall,123,1.0,1.0,1.0
+Random Forest (ML),s3,30,1.0,1.0,1.0
+Random Forest (ML),iam,54,1.0,1.0,1.0
+Random Forest (ML),security_group,39,1.0,1.0,1.0

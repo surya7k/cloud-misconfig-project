@@ -4,5 +4,8 @@
     "public_access_enabled": 1,
     "encryption_enabled": 0,
     "versioning_enabled": 0,
-    "logging_enabled": 0
+    "logging_enabled": 0,
+    "bucket_policy_wildcard": 1,
+    "mfa_delete_enabled": 0,
+    "tls_enforced": 0
 }

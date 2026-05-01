@@ -1,0 +1,16 @@
+{
+    "_source": "AWS data lake reference architecture (aws-samples)",
+    "_source_url": "https://github.com/aws-samples",
+    "_pattern_description": "Production data lake landing bucket from an AWS reference architecture: SSE-KMS encryption, versioning enabled, access logging to a separate logging bucket, public access blocked. Bucket policy enforces TLS-only access via aws:SecureTransport condition.",
+    "_expected_verdict": "SECURE",
+
+    "resource_type": "s3",
+    "resource_name": "rw-aws-samples-data-lake-s3",
+    "public_access_enabled": 0,
+    "encryption_enabled": 1,
+    "versioning_enabled": 1,
+    "logging_enabled": 1,
+    "bucket_policy_wildcard": 0,
+    "mfa_delete_enabled": 1,
+    "tls_enforced": 1
+}
