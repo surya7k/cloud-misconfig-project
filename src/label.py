@@ -17,13 +17,29 @@ def add_labels(df):
         "label"
     ] = 1
     
-    # IAM: wildcard OR priv-esc = misconfigured
+    # IAM: wildcard / admin / priv-esc = misconfigured.
+    # Week 10 expansion: also flag (a) two or more dangerous service wildcards
+    # (s3:*, iam:*, etc.) and (b) Allow with Resource: "*" but no Condition
+    # block (no MFA/IP guardrails) — CIS/AWS-best-practices violations even
+    # when no literal Action: "*" is present.
     iam_mask = (labeled["resource_type"] == "iam")
+    if "dangerous_service_wildcard" not in labeled.columns:
+        labeled["dangerous_service_wildcard"] = 0
+    if "has_no_condition" not in labeled.columns:
+        labeled["has_no_condition"] = 0
+    if "allow_wildcard_resource" not in labeled.columns:
+        labeled["allow_wildcard_resource"] = 0
+
     labeled.loc[
         iam_mask & (
             (labeled["has_wildcard_permission"] == 1) |
             (labeled["has_admin_privilege"] == 1) |
-            (labeled["has_priv_esc_potential"] == 1)
+            (labeled["has_priv_esc_potential"] == 1) |
+            (labeled["dangerous_service_wildcard"].fillna(0) >= 2) |
+            (
+                (labeled["has_no_condition"].fillna(0) == 1) &
+                (labeled["allow_wildcard_resource"].fillna(0) == 1)
+            )
         ),
         "label"
     ] = 1

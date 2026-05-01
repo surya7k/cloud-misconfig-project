@@ -1,0 +1,25 @@
+{
+    "_source": "Common Stack Overflow / quick-start tutorial pattern",
+    "_source_url": "Pattern observed in many EC2 quick-start tutorials and StackOverflow answers (e.g. 'I just want to SSH to my instance')",
+    "_pattern_description": "Classic developer mistake: SSH (port 22) opened to 0.0.0.0/0 with a 'TODO: restrict to my IP' comment that never gets done. Plus unrestricted egress. Among the most common AWS misconfigurations encountered in production.",
+    "_expected_verdict": "MISCONFIGURED",
+
+    "resource_type": "security_group",
+    "resource_name": "rw-stackoverflow-ssh-open",
+    "inbound_rules": [
+        {
+            "from_port": 22,
+            "to_port": 22,
+            "protocol": "tcp",
+            "cidr": "0.0.0.0/0"
+        }
+    ],
+    "outbound_rules": [
+        {
+            "from_port": 0,
+            "to_port": 65535,
+            "protocol": "-1",
+            "cidr": "0.0.0.0/0"
+        }
+    ]
+}

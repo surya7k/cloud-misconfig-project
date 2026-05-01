@@ -1,0 +1,37 @@
+{
+    "_source": "terraform-aws-modules/terraform-aws-iam (Terraform Registry)",
+    "_source_url": "https://github.com/terraform-aws-modules/terraform-aws-iam",
+    "_pattern_description": "Scoped read-only IAM role following least-privilege best practice. Specific S3 read actions on a single bucket ARN, with MFA and source-IP conditions enforced.",
+    "_expected_verdict": "SECURE",
+
+    "resource_type": "iam",
+    "resource_name": "rw-tf-modules-readonly-role",
+    "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:GetObject",
+                    "s3:GetObjectVersion",
+                    "s3:ListBucket"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::production-data-lake",
+                    "arn:aws:s3:::production-data-lake/*"
+                ],
+                "Condition": {
+                    "Bool": {
+                        "aws:MultiFactorAuthPresent": "true"
+                    },
+                    "IpAddress": {
+                        "aws:SourceIp": [
+                            "10.0.0.0/8",
+                            "172.16.0.0/12"
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}

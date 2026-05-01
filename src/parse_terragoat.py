@@ -224,6 +224,13 @@ def label_row(row):
             row["has_admin_privilege"] == 1 or
             row["has_priv_esc_potential"] == 1):
             return 1
+        # Week 10 expansion: dangerous service wildcards (>=2) or
+        # Resource: "*" without a Condition block = misconfigured.
+        if row.get("dangerous_service_wildcard", 0) >= 2:
+            return 1
+        if (row.get("has_no_condition", 0) == 1 and
+                row.get("allow_wildcard_resource", 0) == 1):
+            return 1
         return 0
     elif row["resource_type"] == "security_group":
         if row["open_ports_to_world"] > 0 or row["inbound_rule_count"] > 1:

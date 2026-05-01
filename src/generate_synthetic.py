@@ -5,7 +5,9 @@ random.seed(42)
 
 DATA_PROCESSED = "data/processed"
 
-def make_s3(name, public, encrypt, version, logging, label):
+
+def make_s3(name, public, encrypt, version, logging, label,
+            bucket_policy_wildcard=0, mfa_delete_enabled=0, tls_enforced=0):
     return {
         "resource_type": "s3", "resource_name": name,
         "public_access_enabled": public, "encryption_enabled": encrypt,
@@ -15,10 +17,20 @@ def make_s3(name, public, encrypt, version, logging, label):
         "inbound_rule_count": 0, "outbound_rule_count": 0,
         "open_ports_to_world": 0, "ssh_open_to_world": 0,
         "rdp_open_to_world": 0, "allow_wildcard_action": 0,
-        "allow_wildcard_resource": 0, "all_ports_open": 0, "label": label,
+        "allow_wildcard_resource": 0, "all_ports_open": 0,
+        "bucket_policy_wildcard": bucket_policy_wildcard,
+        "mfa_delete_enabled": mfa_delete_enabled,
+        "tls_enforced": tls_enforced,
+        "dangerous_service_wildcard": 0,
+        "has_no_condition": 0,
+        "db_port_open_to_world": 0,
+        "egress_unrestricted": 0,
+        "label": label,
     }
 
-def make_iam(name, wildcard, admin, priv_esc, policy_len, label):
+
+def make_iam(name, wildcard, admin, priv_esc, policy_len, label,
+             dangerous_service_wildcard=0, has_no_condition=0):
     return {
         "resource_type": "iam", "resource_name": name,
         "public_access_enabled": 0, "encryption_enabled": 0,
@@ -28,10 +40,17 @@ def make_iam(name, wildcard, admin, priv_esc, policy_len, label):
         "inbound_rule_count": 0, "outbound_rule_count": 0,
         "open_ports_to_world": 0, "ssh_open_to_world": 0,
         "rdp_open_to_world": 0, "allow_wildcard_action": wildcard,
-        "allow_wildcard_resource": admin, "all_ports_open": 0, "label": label,
+        "allow_wildcard_resource": admin, "all_ports_open": 0,
+        "bucket_policy_wildcard": 0, "mfa_delete_enabled": 0, "tls_enforced": 0,
+        "dangerous_service_wildcard": dangerous_service_wildcard,
+        "has_no_condition": has_no_condition,
+        "db_port_open_to_world": 0, "egress_unrestricted": 0,
+        "label": label,
     }
 
-def make_sg(name, inbound, outbound, open_ports, ssh, rdp, all_ports, label):
+
+def make_sg(name, inbound, outbound, open_ports, ssh, rdp, all_ports, label,
+            db_port_open_to_world=0, egress_unrestricted=0):
     return {
         "resource_type": "security_group", "resource_name": name,
         "public_access_enabled": 0, "encryption_enabled": 0,
@@ -41,15 +60,20 @@ def make_sg(name, inbound, outbound, open_ports, ssh, rdp, all_ports, label):
         "inbound_rule_count": inbound, "outbound_rule_count": outbound,
         "open_ports_to_world": open_ports, "ssh_open_to_world": ssh,
         "rdp_open_to_world": rdp, "allow_wildcard_action": 0,
-        "allow_wildcard_resource": 0, "all_ports_open": all_ports, "label": label,
+        "allow_wildcard_resource": 0, "all_ports_open": all_ports,
+        "bucket_policy_wildcard": 0, "mfa_delete_enabled": 0, "tls_enforced": 0,
+        "dangerous_service_wildcard": 0, "has_no_condition": 0,
+        "db_port_open_to_world": db_port_open_to_world,
+        "egress_unrestricted": egress_unrestricted,
+        "label": label,
     }
 
 
 def main():
     records = []
 
-    # ── Misconfigured S3 (11 records) 
-    # Missing exactly one security feature each — the hard cases the model misses
+    # ── Misconfigured S3 (11 records) ────────────────────────────────────────
+    # Original cases — missing one of the 4 base controls
     records.append(make_s3("syn-misc-s3-no-encrypt-1",    0, 0, 1, 1, 1))
     records.append(make_s3("syn-misc-s3-no-encrypt-2",    0, 0, 1, 1, 1))
     records.append(make_s3("syn-misc-s3-no-version-1",    0, 1, 0, 1, 1))
@@ -62,45 +86,58 @@ def main():
     records.append(make_s3("syn-misc-s3-multi-2",         0, 1, 0, 0, 1))
     records.append(make_s3("syn-misc-s3-multi-3",         1, 0, 0, 0, 1))
 
-    # ── Secure S3 (10 records) 
-    records.append(make_s3("syn-secure-s3-1",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-2",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-3",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-4",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-5",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-6",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-7",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-8",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-9",  0, 1, 1, 1, 0))
-    records.append(make_s3("syn-secure-s3-10", 0, 1, 1, 1, 0))
+    # Week 10: misconfigured S3 driven by NEW features only
+    # (the 4 base controls are correctly set, but new dimensions fail)
+    records.append(make_s3("syn-misc-s3-policy-wildcard-1", 0, 1, 1, 1, 1,
+                           bucket_policy_wildcard=1))
+    records.append(make_s3("syn-misc-s3-policy-wildcard-2", 0, 1, 1, 1, 1,
+                           bucket_policy_wildcard=1))
+    records.append(make_s3("syn-misc-s3-no-tls-1", 0, 1, 1, 1, 1,
+                           tls_enforced=0, mfa_delete_enabled=0))
+    records.append(make_s3("syn-misc-s3-no-tls-2", 0, 1, 1, 1, 1,
+                           tls_enforced=0))
+    # Public bucket WITH a wildcard bucket policy — worst case
+    records.append(make_s3("syn-misc-s3-public-and-wildcard", 1, 0, 0, 0, 1,
+                           bucket_policy_wildcard=1, tls_enforced=0))
 
-    # ── Misconfigured IAM (11 records) ───────────────────────────────────────
-    records.append(make_iam("syn-misc-iam-wildcard-1",   1, 1, 0, 95,  1))
-    records.append(make_iam("syn-misc-iam-wildcard-2",   1, 1, 0, 110, 1))
-    records.append(make_iam("syn-misc-iam-wildcard-3",   1, 0, 0, 80,  1))
-    records.append(make_iam("syn-misc-iam-privesc-1",    0, 0, 1, 145, 1))
-    records.append(make_iam("syn-misc-iam-privesc-2",    0, 0, 1, 160, 1))
-    records.append(make_iam("syn-misc-iam-privesc-3",    0, 0, 1, 130, 1))
-    records.append(make_iam("syn-misc-iam-admin-1",      1, 1, 1, 200, 1))
-    records.append(make_iam("syn-misc-iam-admin-2",      1, 1, 0, 175, 1))
-    records.append(make_iam("syn-misc-iam-admin-3",      1, 1, 1, 220, 1))
-    records.append(make_iam("syn-misc-iam-wildcard-4",   1, 0, 0, 70,  1))
-    records.append(make_iam("syn-misc-iam-privesc-4",    0, 0, 1, 190, 1))
+    # ── Secure S3 (10 records) — now with full security posture ─────────────
+    for i in range(1, 11):
+        records.append(make_s3(f"syn-secure-s3-{i}", 0, 1, 1, 1, 0,
+                               bucket_policy_wildcard=0,
+                               mfa_delete_enabled=1,
+                               tls_enforced=1))
 
-    # ── Secure IAM (10 records) 
-    # Varied policy lengths to give the model signal that length alone != safe
-    records.append(make_iam("syn-secure-iam-1",  0, 0, 0, 95,  0))
-    records.append(make_iam("syn-secure-iam-2",  0, 0, 0, 120, 0))
-    records.append(make_iam("syn-secure-iam-3",  0, 0, 0, 80,  0))
-    records.append(make_iam("syn-secure-iam-4",  0, 0, 0, 145, 0))
-    records.append(make_iam("syn-secure-iam-5",  0, 0, 0, 160, 0))
-    records.append(make_iam("syn-secure-iam-6",  0, 0, 0, 200, 0))
-    records.append(make_iam("syn-secure-iam-7",  0, 0, 0, 110, 0))
-    records.append(make_iam("syn-secure-iam-8",  0, 0, 0, 175, 0))
-    records.append(make_iam("syn-secure-iam-9",  0, 0, 0, 90,  0))
-    records.append(make_iam("syn-secure-iam-10", 0, 0, 0, 130, 0))
+    # ── Misconfigured IAM (11 records) ──────────────────────────────────────
+    # Original wildcard / privesc / admin cases — also assert no_condition=1
+    records.append(make_iam("syn-misc-iam-wildcard-1",   1, 1, 0, 95,  1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-wildcard-2",   1, 1, 0, 110, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-wildcard-3",   1, 0, 0, 80,  1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-privesc-1",    0, 0, 1, 145, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-privesc-2",    0, 0, 1, 160, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-privesc-3",    0, 0, 1, 130, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-admin-1",      1, 1, 1, 200, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-admin-2",      1, 1, 0, 175, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-admin-3",      1, 1, 1, 220, 1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-wildcard-4",   1, 0, 0, 70,  1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-privesc-4",    0, 0, 1, 190, 1, has_no_condition=1))
 
-    # ── Misconfigured SG (9 records) 
+    # Week 10: NEW IAM misconfig drivers
+    # Service wildcard: not full admin, but s3:* / iam:* / ec2:* without conditions
+    records.append(make_iam("syn-misc-iam-service-wild-1", 0, 0, 0, 140, 1,
+                            dangerous_service_wildcard=1, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-service-wild-2", 0, 0, 0, 165, 1,
+                            dangerous_service_wildcard=2, has_no_condition=1))
+    records.append(make_iam("syn-misc-iam-service-wild-3", 0, 0, 0, 180, 1,
+                            dangerous_service_wildcard=3, has_no_condition=1))
+
+    # ── Secure IAM (10 records) — assert conditions ARE present ────────────
+    for i in range(1, 11):
+        records.append(make_iam(f"syn-secure-iam-{i}", 0, 0, 0,
+                                95 + (i * 12), 0,
+                                dangerous_service_wildcard=0,
+                                has_no_condition=0))
+
+    # ── Misconfigured SG (9 records) ──────────────────────────────────────
     records.append(make_sg("syn-misc-sg-ssh-1",      2, 1, 1, 1, 0, 0, 1))
     records.append(make_sg("syn-misc-sg-ssh-2",      1, 1, 1, 1, 0, 0, 1))
     records.append(make_sg("syn-misc-sg-rdp-1",      1, 1, 1, 0, 1, 0, 1))
@@ -111,19 +148,24 @@ def main():
     records.append(make_sg("syn-misc-sg-open-2",     2, 1, 2, 1, 0, 0, 1))
     records.append(make_sg("syn-misc-sg-open-3",     1, 1, 1, 0, 0, 0, 1))
 
-    # ── Secure SG (12 records) 
-    records.append(make_sg("syn-secure-sg-1",  1, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-2",  1, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-3",  1, 0, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-4",  1, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-5",  2, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-6",  1, 2, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-7",  0, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-8",  1, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-9",  2, 2, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-10", 1, 1, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-11", 1, 0, 0, 0, 0, 0, 0))
-    records.append(make_sg("syn-secure-sg-12", 0, 0, 0, 0, 0, 0, 0))
+    # Week 10: NEW SG misconfig drivers — DB ports + unrestricted egress
+    records.append(make_sg("syn-misc-sg-mysql-open",    1, 1, 1, 0, 0, 0, 1,
+                           db_port_open_to_world=1))
+    records.append(make_sg("syn-misc-sg-postgres-open", 1, 1, 1, 0, 0, 0, 1,
+                           db_port_open_to_world=1))
+    records.append(make_sg("syn-misc-sg-multi-db-open", 2, 1, 2, 0, 0, 0, 1,
+                           db_port_open_to_world=2))
+    records.append(make_sg("syn-misc-sg-mongo-redis",   2, 1, 2, 0, 0, 0, 1,
+                           db_port_open_to_world=2,
+                           egress_unrestricted=1))
+    records.append(make_sg("syn-misc-sg-egress-only",   1, 1, 0, 0, 0, 0, 1,
+                           egress_unrestricted=1))
+
+    # ── Secure SG (12 records) — restricted egress, no DB exposure ────────
+    for i in range(1, 13):
+        records.append(make_sg(f"syn-secure-sg-{i}", 1, 1, 0, 0, 0, 0, 0,
+                               db_port_open_to_world=0,
+                               egress_unrestricted=0))
 
     df = pd.DataFrame(records)
 
@@ -145,6 +187,7 @@ def main():
     print(f"  SG:  {sum(1 for r in records if r['resource_type']=='security_group')} "
           f"({sum(1 for r in records if r['resource_type']=='security_group' and r['label']==1)} misc, "
           f"{sum(1 for r in records if r['resource_type']=='security_group' and r['label']==0)} secure)")
+
 
 if __name__ == "__main__":
     main()

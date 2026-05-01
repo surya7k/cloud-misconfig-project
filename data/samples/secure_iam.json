@@ -10,7 +10,15 @@
                     "s3:GetObject",
                     "s3:ListBucket"
                 ],
-                "Resource": "arn:aws:s3:::my-bucket/*"
+                "Resource": "arn:aws:s3:::my-bucket/*",
+                "Condition": {
+                    "Bool": {
+                        "aws:MultiFactorAuthPresent": "true"
+                    },
+                    "IpAddress": {
+                        "aws:SourceIp": "10.0.0.0/8"
+                    }
+                }
             }
         ]
     }

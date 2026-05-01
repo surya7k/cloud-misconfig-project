@@ -1,0 +1,22 @@
+{
+    "_source": "AWS CDK default Lambda execution role (aws-samples/aws-cdk-examples)",
+    "_source_url": "https://github.com/aws-samples/aws-cdk-examples",
+    "_pattern_description": "CDK-generated default Lambda execution role: only logs:CreateLogStream and logs:PutLogEvents on a specific scoped log group ARN. No wildcards, no broad service permissions. The CDK default for new functions.",
+    "_expected_verdict": "SECURE",
+
+    "resource_type": "iam",
+    "resource_name": "rw-cdk-lambda-default-role",
+    "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                "Resource": "arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/MyFunction:*"
+            }
+        ]
+    }
+}

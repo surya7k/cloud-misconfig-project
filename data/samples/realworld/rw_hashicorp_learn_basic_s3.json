@@ -1,0 +1,16 @@
+{
+    "_source": "HashiCorp Learn tutorial pattern",
+    "_source_url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started",
+    "_pattern_description": "Common HashiCorp Learn tutorial S3 bucket — minimal config to demonstrate Terraform basics; no encryption, versioning, logging, MFA delete, or TLS enforcement. Real-world deployments that copy this pattern as a starting point typically miss several controls.",
+    "_expected_verdict": "MISCONFIGURED",
+
+    "resource_type": "s3",
+    "resource_name": "rw-hashicorp-learn-basic-s3",
+    "public_access_enabled": 0,
+    "encryption_enabled": 0,
+    "versioning_enabled": 0,
+    "logging_enabled": 0,
+    "bucket_policy_wildcard": 0,
+    "mfa_delete_enabled": 0,
+    "tls_enforced": 0
+}

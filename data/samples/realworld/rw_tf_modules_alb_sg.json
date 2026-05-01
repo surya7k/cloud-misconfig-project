@@ -1,0 +1,31 @@
+{
+    "_source": "terraform-aws-modules/terraform-aws-security-group (Terraform Registry)",
+    "_source_url": "https://github.com/terraform-aws-modules/terraform-aws-security-group",
+    "_pattern_description": "Public-facing Application Load Balancer security group: HTTP (80) and HTTPS (443) open to 0.0.0.0/0. This is INTENTIONAL for an internet-facing ALB — but our model's rules flag ANY open port to the world as misconfigured. Useful demo case: model lacks intent context, would benefit from resource-purpose metadata in real production deployment.",
+    "_expected_verdict": "MISCONFIGURED (per model rules) / SECURE in context (legitimate public ALB)",
+
+    "resource_type": "security_group",
+    "resource_name": "rw-tf-modules-alb-sg",
+    "inbound_rules": [
+        {
+            "from_port": 80,
+            "to_port": 80,
+            "protocol": "tcp",
+            "cidr": "0.0.0.0/0"
+        },
+        {
+            "from_port": 443,
+            "to_port": 443,
+            "protocol": "tcp",
+            "cidr": "0.0.0.0/0"
+        }
+    ],
+    "outbound_rules": [
+        {
+            "from_port": 0,
+            "to_port": 65535,
+            "protocol": "tcp",
+            "cidr": "10.0.0.0/8"
+        }
+    ]
+}

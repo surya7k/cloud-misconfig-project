@@ -1,0 +1,33 @@
+{
+    "_source": "Common tutorial / blog-post pattern (broadly across AWS Lambda walkthroughs)",
+    "_source_url": "https://github.com/aws-samples (anti-pattern — frequently appears in tutorials before scope-down step)",
+    "_pattern_description": "Lambda execution role with broad service wildcards (s3:*, dynamodb:*, sns:*) and no Conditions. Common 'make it work first' pattern that often ships to production unchanged. No full admin (Action: *), but service wildcards on Resource: * enable significant blast radius.",
+    "_expected_verdict": "MISCONFIGURED",
+
+    "resource_type": "iam",
+    "resource_name": "rw-overprivileged-lambda-role",
+    "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:*",
+                    "dynamodb:*",
+                    "sns:*",
+                    "sqs:*"
+                ],
+                "Resource": "*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }
+}

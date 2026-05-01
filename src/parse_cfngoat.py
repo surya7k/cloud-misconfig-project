@@ -209,9 +209,17 @@ def label_row(row):
                      row["logging_enabled"] == 0 or
                      row["public_access_enabled"] == 1) else 0
     elif row["resource_type"] == "iam":
-        return 1 if (row["has_wildcard_permission"] == 1 or
-                     row["has_admin_privilege"] == 1 or
-                     row["has_priv_esc_potential"] == 1) else 0
+        if (row["has_wildcard_permission"] == 1 or
+                row["has_admin_privilege"] == 1 or
+                row["has_priv_esc_potential"] == 1):
+            return 1
+        # Week 10 expansion: dangerous service wildcards or unconditioned wildcard-resource
+        if row.get("dangerous_service_wildcard", 0) >= 2:
+            return 1
+        if (row.get("has_no_condition", 0) == 1 and
+                row.get("allow_wildcard_resource", 0) == 1):
+            return 1
+        return 0
     elif row["resource_type"] == "security_group":
         return 1 if (row["open_ports_to_world"] > 0 or
                      row["inbound_rule_count"] > 1) else 0
