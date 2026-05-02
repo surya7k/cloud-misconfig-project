@@ -1,0 +1,9 @@
+file,resource_type,resource_name,expected_verdict,y_strict,y_context,y_pred,p_misconfigured,risk_level,agree_strict,agree_context
+rw_aws_samples_data_lake_s3.json,s3,rw-aws-samples-data-lake-s3,SECURE,0,0,0,0.0,LOW,1,1
+rw_aws_samples_secure_s3.json,s3,rw-aws-samples-secure-s3,SECURE,0,0,0,0.0,LOW,1,1
+rw_cdk_lambda_default_role.json,iam,rw-cdk-lambda-default-role,SECURE,0,0,0,0.24,LOW,1,1
+rw_hashicorp_learn_basic_s3.json,s3,rw-hashicorp-learn-basic-s3,MISCONFIGURED,1,1,1,0.662,MEDIUM,1,1
+rw_lambda_overprivileged_role.json,iam,rw-overprivileged-lambda-role,MISCONFIGURED,1,1,1,0.605,MEDIUM,1,1
+rw_stackoverflow_ssh_open.json,security_group,rw-stackoverflow-ssh-open,MISCONFIGURED,1,1,1,0.994,HIGH,1,1
+rw_tf_modules_alb_sg.json,security_group,rw-tf-modules-alb-sg,MISCONFIGURED (per model rules) / SECURE in context (legitimate public ALB),1,0,0,0.273,LOW,0,1
+rw_tf_modules_iam_readonly.json,iam,rw-tf-modules-readonly-role,SECURE,0,0,0,0.0,LOW,1,1
