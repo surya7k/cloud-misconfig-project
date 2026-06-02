@@ -13,55 +13,24 @@ import sys
 import joblib
 import numpy as np
 
-FEATURE_COLS = [
-    # Original S3
-    "public_access_enabled", "encryption_enabled",
-    "versioning_enabled", "logging_enabled",
-    # Original IAM
-    "has_wildcard_permission", "has_admin_privilege",
-    "has_priv_esc_potential", "policy_length",
-    # Original SG
-    "inbound_rule_count", "outbound_rule_count",
-    "open_ports_to_world", "ssh_open_to_world", "rdp_open_to_world",
-    # Effect-aware IAM
-    "allow_wildcard_action", "allow_wildcard_resource",
-    "all_ports_open",
-    # S3 derived interactions
-    "s3_missing_control_count", "s3_no_encrypt_no_version", "s3_public_no_logging",
-    # NEW — Week 10 expansion
-    "bucket_policy_wildcard", "mfa_delete_enabled", "tls_enforced",
-    "dangerous_service_wildcard", "has_no_condition",
-    "db_port_open_to_world", "egress_unrestricted",
-]
+try:
+    from src.schema import (
+        DANGEROUS_SERVICE_PREFIXES,
+        DB_PORTS_OF_CONCERN,
+        FEATURE_COLS,
+        PRIV_ESC_ACTIONS,
+        S3_THRESHOLD_DEFAULT,
+    )
+except ModuleNotFoundError:
+    from schema import (
+        DANGEROUS_SERVICE_PREFIXES,
+        DB_PORTS_OF_CONCERN,
+        FEATURE_COLS,
+        PRIV_ESC_ACTIONS,
+        S3_THRESHOLD_DEFAULT,
+    )
 
-S3_THRESHOLD = 0.40
-
-PRIV_ESC_ACTIONS = {
-    "iam:AttachUserPolicy", "iam:CreatePolicyVersion",
-    "iam:PutUserPolicy", "iam:AttachRolePolicy",
-    "iam:PassRole", "iam:SetDefaultPolicyVersion"
-}
-
-# Service-wildcard actions that are dangerous but less than full admin (`*`).
-# Each entry is the prefix before ":*", e.g. "s3" matches "s3:*".
-DANGEROUS_SERVICE_PREFIXES = {
-    "s3", "iam", "ec2", "lambda", "rds", "kms",
-    "secretsmanager", "ssm", "sts", "dynamodb",
-}
-
-# Database / data-store ports that should never be open to the world
-DB_PORTS_OF_CONCERN = {
-    3306,   # MySQL / MariaDB
-    5432,   # PostgreSQL
-    1433,   # MSSQL
-    1521,   # Oracle
-    27017,  # MongoDB
-    6379,   # Redis
-    9200,   # Elasticsearch
-    11211,  # Memcached
-    5984,   # CouchDB
-    7000, 7001, 9042,  # Cassandra
-}
+S3_THRESHOLD = S3_THRESHOLD_DEFAULT
 
 
 def extract_features(config):

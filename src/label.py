@@ -1,8 +1,18 @@
 import pandas as pd
 
+try:
+    from src.schema import BASE_FEATURE_COLS, EXTENDED_FEATURE_COLS
+except ModuleNotFoundError:
+    from schema import BASE_FEATURE_COLS, EXTENDED_FEATURE_COLS
+
+
 def add_labels(df):
     """Add ground truth labels based on your staged configurations."""
     labeled = df.copy()
+    for col in BASE_FEATURE_COLS + EXTENDED_FEATURE_COLS:
+        if col not in labeled.columns:
+            labeled[col] = 0
+        labeled[col] = labeled[col].fillna(0)
     labeled["label"] = 0  # default to secure
     
     # S3: misconfigured if ANY security feature missing
@@ -23,13 +33,6 @@ def add_labels(df):
     # block (no MFA/IP guardrails) — CIS/AWS-best-practices violations even
     # when no literal Action: "*" is present.
     iam_mask = (labeled["resource_type"] == "iam")
-    if "dangerous_service_wildcard" not in labeled.columns:
-        labeled["dangerous_service_wildcard"] = 0
-    if "has_no_condition" not in labeled.columns:
-        labeled["has_no_condition"] = 0
-    if "allow_wildcard_resource" not in labeled.columns:
-        labeled["allow_wildcard_resource"] = 0
-
     labeled.loc[
         iam_mask & (
             (labeled["has_wildcard_permission"] == 1) |

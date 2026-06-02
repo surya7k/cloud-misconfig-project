@@ -28,12 +28,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 
-from src.predict import FEATURE_COLS, S3_THRESHOLD
-from src.train import (
-    add_s3_derived_features,
-    BASE_FEATURE_COLS,
-    EXTENDED_FEATURE_COLS,
-)
+try:
+    from src.predict import S3_THRESHOLD
+    from src.schema import BASE_FEATURE_COLS, EXTENDED_FEATURE_COLS, FEATURE_COLS
+    from src.train import add_s3_derived_features
+except ModuleNotFoundError:
+    from predict import S3_THRESHOLD
+    from schema import BASE_FEATURE_COLS, EXTENDED_FEATURE_COLS, FEATURE_COLS
+    from train import add_s3_derived_features
 
 warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
 

@@ -17,40 +17,29 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+try:
+    from src.schema import (
+        BASE_FEATURE_COLS,
+        EXTENDED_FEATURE_COLS,
+        FEATURE_COLS,
+        S3_DERIVED_COLS,
+        S3_THRESHOLD_DEFAULT,
+    )
+except ModuleNotFoundError:
+    from schema import (
+        BASE_FEATURE_COLS,
+        EXTENDED_FEATURE_COLS,
+        FEATURE_COLS,
+        S3_DERIVED_COLS,
+        S3_THRESHOLD_DEFAULT,
+    )
+
 
 DATA_PROCESSED = "data/processed"
 MODELS_DIR     = "models"
 OUTPUTS_DIR    = "outputs"
 
-BASE_FEATURE_COLS = [
-    "public_access_enabled", "encryption_enabled",
-    "versioning_enabled", "logging_enabled",
-    "has_wildcard_permission", "has_admin_privilege",
-    "has_priv_esc_potential", "policy_length",
-    "inbound_rule_count", "outbound_rule_count",
-    "open_ports_to_world", "ssh_open_to_world", "rdp_open_to_world",
-    "allow_wildcard_action", "allow_wildcard_resource", "all_ports_open",
-]
-
-S3_DERIVED_COLS = [
-    "s3_missing_control_count",
-    "s3_no_encrypt_no_version",
-    "s3_public_no_logging",
-]
-
-# Week 10 expansion — additional security-relevant features
-EXTENDED_FEATURE_COLS = [
-    # S3
-    "bucket_policy_wildcard", "mfa_delete_enabled", "tls_enforced",
-    # IAM
-    "dangerous_service_wildcard", "has_no_condition",
-    # Security Group
-    "db_port_open_to_world", "egress_unrestricted",
-]
-
-FEATURE_COLS = BASE_FEATURE_COLS + S3_DERIVED_COLS + EXTENDED_FEATURE_COLS
-
-S3_THRESHOLD = 0.40  # default, will be overridden by F2-optimal threshold
+S3_THRESHOLD = S3_THRESHOLD_DEFAULT  # overridden by F2-optimal threshold during training
 
 
 def find_optimal_s3_threshold(y_true, y_proba, s3_mask):
